@@ -1,60 +1,132 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MySet;
+using System.Collections.Generic;
+
 namespace MySetTests
 {
-    [TestClass]
-    public class ArraySetTest
+    //Базовый класс, тестирующий все методы ISet
+    public abstract class BaseSetTest
     {
-        [TestMethod]
-        public void CreateArraySet()
-        {
-            ArraySet<int> arraySet = new ArraySet<int>();
-        }
-          
-        [TestMethod]
-        public void AddItemMustIncreaseCount()
-        {
-            ArraySet<int> arraySet = new ArraySet<int>();
-            int count = arraySet.Count;
-            arraySet.Add(1);
-            Assert.IsTrue(arraySet.Count > count);
+        protected MySet.ISet<int> mySet;
 
-            count = arraySet.Count;
-            arraySet.Add(1);
-            Assert.IsTrue(arraySet.Count > count);
+        //Добавление разных элементов увеличивает Count
+        [TestMethod]
+        public void AddDifferentItemMustIncreaseCount()
+        {
+            int count = mySet.Count;
+            mySet.Add(1);
+            Assert.IsTrue(mySet.Count > count);
+
+            count = mySet.Count;
+            mySet.Add(2);
+            Assert.IsTrue(mySet.Count > count);
         }
 
+        //Добавление одинаковых элементов не увеличивает Count
+        [TestMethod]
+        public void AddDuplicateItemMustntIncreaseCount()
+        {
+            mySet.Add(1);
+            int count = mySet.Count;
+            mySet.Add(1);
+            Assert.AreEqual(count, mySet.Count);
+        }
+
+        //Удаление существующего элемента уменьшает Count
         [TestMethod]
         public void RemoveExistedItemDecreaseCount()
         {
-            ArraySet<int> arraySet = new ArraySet<int>();
-            arraySet.Add(1);
-            int count = arraySet.Count;
-            arraySet.Remove(1);
-            Assert.IsTrue(arraySet.Count < count);
+            mySet.Add(1);
+            mySet.Add(2);
+
+            int count = mySet.Count;
+            mySet.Remove(1);
+            Assert.IsTrue(mySet.Count < count);
         }
 
+        //Удаление несуществующего элемента не уменьшает Count
         [TestMethod]
-        public void RemoveNonExistedItemDecreaseCount()
+        public void RemoveNonExistedItemNotDecreaseCount()
         {
-            ArraySet<int> arraySet = new ArraySet<int>();
-            arraySet.Add(1);
-            int count = arraySet.Count;
-            arraySet.Remove(10);
-            Assert.AreEqual(count, arraySet.Count);
+            mySet.Add(1);
+            mySet.Add(2);
+
+            int count = mySet.Count;
+            mySet.Remove(10);
+            Assert.AreEqual(count, mySet.Count);
         }
 
+        //После Clear Count == 0
         [TestMethod]
         public void ClearClearsSet()
         {
-            ArraySet<int> arraySet = new ArraySet<int>();
-            arraySet.Add(1);
-            arraySet.Add(2);
-            arraySet.Add(3);
-            arraySet.Clear();
+            mySet.Add(1);
+            mySet.Add(2);
+            mySet.Add(3);
 
-            Assert.AreEqual(0, arraySet.Count);
+            mySet.Clear();
+
+            Assert.AreEqual(0, mySet.Count);
+        }
+
+        //Contains возвращает корректное значение
+        [TestMethod]
+        public void ContainsReturnCorrectBool()
+        {
+            mySet.Add(11);
+            mySet.Add(22);
+            mySet.Add(33);
+
+            Assert.IsTrue(mySet.Contains(22));
+            Assert.IsFalse(mySet.Contains(23));
+        }
+
+        //Проверяет, че там ваще хранится в этом mySet
+        [TestMethod]
+        public void EnumeratorWork()
+        {
+            mySet.Add(11);
+            mySet.Add(22);
+            mySet.Add(44);
+            mySet.Add(33);
+            mySet.Remove(44);
+
+            HashSet<int> hs = new HashSet<int>();
+            hs.Add(11);
+            hs.Add(22);
+            hs.Add(33);
+
+            int foreachcount = 0;
+            foreach (int item in mySet)
+            {
+                foreachcount++;
+                Assert.IsTrue(hs.Contains(item));
+                hs.Remove(item);//На случай, если в mySet 3 одинаковых элемента
+            }
+            Assert.AreEqual(3, foreachcount);
+        }
+    }
+
+    
+    [TestClass]
+    public class ArraySetTest : BaseSetTest
+    {
+        [TestInitialize]
+        public void Setup()//Подставляет ArraySet в mySet перед каждым тестом
+        {
+            this.mySet = new ArraySet<int>();
+        }
+
+    }
+
+    [TestClass]
+    public class LinkedSetTest : BaseSetTest
+    {
+        [TestInitialize]
+        public void Setup()//Подставляет LinkedSet в mySet перед каждым тестом
+        {
+            this.mySet = new LinkedSet<int>();
         }
     }
 }
