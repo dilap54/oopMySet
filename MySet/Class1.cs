@@ -19,7 +19,7 @@ namespace MySet
     }
 
     //Базовый класс
-    public abstract class ISet<T>: IEnumerable
+    public abstract class ISet<T>: IEnumerable where T : IEquatable<T>
     {
         //Объявление метода, нужного для IEnumerable
         public abstract IEnumerator GetEnumerator();
@@ -78,8 +78,11 @@ namespace MySet
 
         public override void Add(T value)
         {
-            Array.Resize<T>(ref array, Count+1);
-            array[Count - 1] = value;
+            if (!Contains(value))//Если такого элемента еще нет
+            {
+                Array.Resize<T>(ref array, Count + 1);
+                array[Count - 1] = value;
+            }
         }
 
         public override void Clear()
@@ -91,7 +94,6 @@ namespace MySet
         {
             foreach (T item in array)
             {
-                //Если ссылки равны
                 if (item.Equals(value))
                 {
                     return true;
@@ -112,5 +114,124 @@ namespace MySet
             }).ToArray();
         }
     }
-    
+
+    public class LinkedSet<T> : ISet<T> where T : IEquatable<T>
+    {
+        class Node
+        {
+            public T data;
+            public Node next;
+
+            public Node(T data, Node next)
+            {
+                this.data = data;
+                this.next = next;
+            }
+        }
+
+        Node head;
+
+        int count;
+
+        public override int Count
+        {
+            get
+            {
+                return count;
+            }
+        }
+
+        public override bool isEmpty
+        {
+            get
+            {
+                return Count == 0;
+            }
+        }
+
+        public LinkedSet()
+        {
+            head = null;
+            count = 0;
+        }
+
+        public override void Add(T value)
+        {
+            if (head == null)
+            {
+                head = new Node(value, null);
+                count++;
+            }
+            else
+            {
+                if (!Contains(value))
+                {
+                    head = new Node(value, head);
+                    count++;
+                }
+                
+            }
+        }
+
+        public override void Clear()
+        {
+            head = null;
+            count = 0;
+        }
+
+        public override bool Contains(T value)
+        {
+            if (isEmpty)
+            {
+                return false;
+            }
+            Node tmp = head;
+
+            while(tmp != null)
+            {
+                if (tmp.data.Equals(value))
+                {
+                    return true;
+                }
+                tmp = tmp.next;
+            }
+            return false;
+        }
+
+        public override IEnumerator GetEnumerator()
+        {
+            Node tmp = head;
+            while(tmp != null)
+            {
+                yield return tmp.data;
+                tmp = tmp.next;
+            }
+            
+        }
+
+        public override void Remove(T value)
+        {
+            if (head == null)
+            {
+                return;
+            }
+            if (head.data.Equals(value))
+            {
+                Clear();
+                return;
+            }
+
+            Node tmp = head;
+            while(tmp.next != null && !tmp.next.data.Equals(value))
+            {
+                tmp = tmp.next;
+            }
+            if (tmp.next != null)
+            {
+                tmp.next = tmp.next.next;
+                count--;
+            }
+
+        }
+    }
 }
