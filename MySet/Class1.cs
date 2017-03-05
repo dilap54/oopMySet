@@ -234,4 +234,95 @@ namespace MySet
 
         }
     }
+
+    public class HashSet<T> : ISet<T> where T : IEquatable<T>
+    {
+        T[][] htable;
+        const int htLength = 1000;
+
+        public HashSet()
+        {
+            htable = new T[htLength][];//Типа хеш таблица
+            for (int i=0; i<htLength; i++)
+            {
+                htable[i] = new T[0];
+            }
+        }
+
+        public override int Count
+        {
+            get
+            {
+                int count = 0;
+                foreach (Array arr in htable)
+                {
+                    count += arr.Length;
+                }
+                return count;
+            }
+        }
+
+        public override bool isEmpty
+        {
+            get
+            {
+                return Count == 0;
+            }
+        }
+
+        public override void Add(T value)
+        {
+            if (!Contains(value))
+            {
+                int hash = value.GetHashCode() % htLength;
+                //T[] arrayOnHash = htable[hash];
+                //Ну и почему я дальше не могу использовать arrayOnHash вместо htable[hash]?
+                Array.Resize(ref htable[hash], htable[hash].Length + 1);
+                htable[hash][htable[hash].Length - 1] = value;
+            }
+        }
+
+        public override void Clear()
+        {
+            htable = new T[htLength][];//Типа хеш таблица
+            for (int i = 0; i < htLength; i++)
+            {
+                htable[i] = new T[0];
+            }
+        }
+
+        public override bool Contains(T value)
+        {
+            int hash = value.GetHashCode() % htLength;
+            T[] arrayOnHash = htable[hash];
+            foreach (T item in arrayOnHash)
+            {
+                if (item.Equals(value))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public override IEnumerator GetEnumerator()
+        {
+            foreach (T[] item in htable)
+            {
+                //yield return item.GetEnumerator();
+                foreach(T item2 in item)
+                {
+                    yield return item2;
+                }
+            }
+        }
+
+        public override void Remove(T value)
+        {
+            int hash = value.GetHashCode() % htLength;
+            htable[hash] = htable[hash].Where((item) => {
+                return !(item.Equals(value));
+            }).ToArray();
+        }
+    }
 }

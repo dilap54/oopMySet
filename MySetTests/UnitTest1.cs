@@ -16,11 +16,11 @@ namespace MySetTests
         {
             int count = mySet.Count;
             mySet.Add(1);
-            Assert.IsTrue(mySet.Count > count);
+            Assert.AreEqual(count + 1, mySet.Count);
 
             count = mySet.Count;
             mySet.Add(2);
-            Assert.IsTrue(mySet.Count > count);
+            Assert.AreEqual(count + 1, mySet.Count);
         }
 
         //Добавление одинаковых элементов не увеличивает Count
@@ -82,6 +82,23 @@ namespace MySetTests
             Assert.IsFalse(mySet.Contains(23));
         }
 
+        //Одинаковое ли количество отправленных и полученных значений
+        [TestMethod]
+        public void EnumeratorReturnEnaughtValues()
+        {
+            int numOfElements = 1234;
+            for (int i=1; i<= numOfElements; i++)
+            {
+                mySet.Add(i);
+            }
+            int recievedValues = 0;
+            foreach (int item in mySet)
+            {
+                recievedValues++;
+            }
+            Assert.AreEqual(numOfElements, recievedValues);
+        }
+
         //Проверяет, че там ваще хранится в этом mySet
         [TestMethod]
         public void EnumeratorWork()
@@ -92,7 +109,7 @@ namespace MySetTests
             mySet.Add(33);
             mySet.Remove(44);
 
-            HashSet<int> hs = new HashSet<int>();
+            System.Collections.Generic.HashSet<int> hs = new System.Collections.Generic.HashSet<int>();
             hs.Add(11);
             hs.Add(22);
             hs.Add(33);
@@ -127,6 +144,15 @@ namespace MySetTests
         public void Setup()//Подставляет LinkedSet в mySet перед каждым тестом
         {
             this.mySet = new LinkedSet<int>();
+        }
+    }
+    [TestClass]
+    public class HashSetTest : BaseSetTest
+    {
+        [TestInitialize]
+        public void Setup()//Подставляет LinkedSet в mySet перед каждым тестом
+        {
+            this.mySet = new MySet.HashSet<int>();
         }
     }
 }
