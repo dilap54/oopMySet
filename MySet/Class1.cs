@@ -10,13 +10,23 @@ namespace MySet
 {
     //Кароче это класс исключений
     [Serializable]
-    class SetException : Exception
+    public class SetException : Exception
     {
-        public SetException(string message) : base(message)
+        public SetException() : base()
         {
 
         }
     }
+
+    [Serializable]
+    public class NotAllowedMethodException : Exception
+    {
+        public NotAllowedMethodException() : base()
+        {
+
+        }
+    }
+
 
     //Базовый класс
     public abstract class ISet<T>: IEnumerable where T : IEquatable<T>
@@ -323,6 +333,45 @@ namespace MySet
             htable[hash] = htable[hash].Where((item) => {
                 return !(item.Equals(value));
             }).ToArray();
+        }
+    }
+
+    public class UnmutableSet<T> : ISet<T> where T : IEquatable<T>
+    {
+        ISet<T> iset;
+
+        public UnmutableSet(ISet<T> iset)
+        {
+            this.iset = iset;
+        }
+
+        public override int Count => iset.Count;
+
+        public override bool isEmpty => iset.isEmpty;
+
+        public override void Add(T value)
+        {
+            throw new NotAllowedMethodException();
+        }
+
+        public override void Clear()
+        {
+            throw new NotAllowedMethodException();
+        }
+
+        public override bool Contains(T value)//Как тут сделать ссылку =>, как в свойстах?
+        {
+            return iset.Contains(value);
+        }
+
+        public override IEnumerator GetEnumerator()
+        {
+            return iset.GetEnumerator();
+        }
+
+        public override void Remove(T value)
+        {
+            throw new NotAllowedMethodException();
         }
     }
 }

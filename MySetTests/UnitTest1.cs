@@ -87,7 +87,7 @@ namespace MySetTests
         public void EnumeratorReturnEnaughtValues()
         {
             int numOfElements = 1234;
-            for (int i=1; i<= numOfElements; i++)
+            for (int i=0; i<numOfElements; i++)
             {
                 mySet.Add(i);
             }
@@ -146,13 +146,64 @@ namespace MySetTests
             this.mySet = new LinkedSet<int>();
         }
     }
+
     [TestClass]
     public class HashSetTest : BaseSetTest
     {
         [TestInitialize]
-        public void Setup()//Подставляет LinkedSet в mySet перед каждым тестом
+        public void Setup()//Подставляет HashSetTest в mySet перед каждым тестом
         {
             this.mySet = new MySet.HashSet<int>();
+        }
+    }
+
+    [TestClass]
+    public class UnmutableSetTest
+    {
+        UnmutableSet<int> mySet100;
+        int setLength = 100;
+
+        [TestInitialize]
+        public void Setup()//Подставляет UnmutableSet в mySet перед каждым тестом
+        {
+            ArraySet<int> arrSet = new ArraySet<int>();
+            for (int i=0; i<setLength; i++)
+            {
+                arrSet.Add(i);
+            }
+            mySet100 = new UnmutableSet<int>(arrSet);
+        }
+
+        [TestMethod]
+        public void CountMustReturnCorrectValue()
+        {
+            Assert.AreEqual(setLength, mySet100.Count);
+
+            ArraySet<int> arrSet = new ArraySet<int>();
+            UnmutableSet<int> mySet = new UnmutableSet<int>(arrSet);
+
+            Assert.AreEqual(0, mySet.Count);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotAllowedMethodException))]
+        public void AddMustThrowException()
+        {
+            mySet100.Add(10);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotAllowedMethodException))]
+        public void ClearMustThrowException()
+        {
+            mySet100.Clear();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotAllowedMethodException))]
+        public void RemoveMustThrowException()
+        {
+            mySet100.Remove(10);
         }
     }
 }
