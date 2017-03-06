@@ -374,4 +374,65 @@ namespace MySet
             throw new NotAllowedMethodException();
         }
     }
+
+    public static class SetUtils //<T> where T : IEquatable<T>
+    {
+
+        public static bool Exists<T>(ISet<T> iset, Func<T, bool> check) where T : IEquatable<T>
+        {
+            foreach (T item in iset)
+            {
+                if (check(item))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        //Эта штука принимает <T, TO>, где TO - возвращаемый тип данных (ArraySet, HashSet, ...)
+        //Иначе я не знаю как сделать ссылку на конструктор нужного типа данных
+        public static TO FindAll<T, TO>(ISet<T> iset, Func<T, bool> check) where T : IEquatable<T> where TO : ISet<T>, new()
+        {
+            TO newSet = new TO();
+            foreach (T item in iset)
+            {
+                if (check(item))
+                {
+                    newSet.Add(item);
+                }
+            }
+            return newSet;
+        }
+
+        public static TO ConvertAll<T, TO>(ISet<T> iset) where T : IEquatable<T> where TO : ISet<T>, new()
+        {
+            TO newSet = new TO();
+            foreach (T item in iset)
+            {
+                newSet.Add(item);
+            }
+            return newSet;
+        }
+
+        public static void ForEach<T>(ISet<T> iset, Action<T> func) where T : IEquatable<T>
+        {
+            foreach (T item in iset)
+            {
+                func(item);
+            }
+        }
+
+        public static bool CheckForAll<T>(ISet<T> iset, Func<T, bool> check) where T : IEquatable<T>
+        {
+            foreach (T item in iset)
+            {
+                if (!check(item))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
 }

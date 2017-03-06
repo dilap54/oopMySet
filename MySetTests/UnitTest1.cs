@@ -10,6 +10,21 @@ namespace MySetTests
     {
         protected MySet.ISet<int> mySet;
 
+        //Count показывает то количество элементов, которое было добавлено
+        [TestMethod]
+        public void CountMustReturnRealCount()
+        {
+            Assert.AreEqual(0, mySet.Count);
+
+            int numOfElements = 123;
+            for (int i = 0; i < numOfElements; i++)
+            {
+                mySet.Add(i);
+            }
+
+            Assert.AreEqual(numOfElements, mySet.Count);
+        }
+
         //Добавление разных элементов увеличивает Count
         [TestMethod]
         public void AddDifferentItemMustIncreaseCount()
@@ -204,6 +219,123 @@ namespace MySetTests
         public void RemoveMustThrowException()
         {
             mySet100.Remove(10);
+        }
+    }
+
+    [TestClass]
+    public class SetUtilsTest
+    {
+        //Exist возвращает true, если элемент есть
+        [TestMethod]
+        public void ExistMustReturnTrueIfItemsExist()
+        {
+            ArraySet<int> arrSet = new ArraySet<int>();
+            arrSet.Add(1);
+            arrSet.Add(3);
+
+            Assert.IsTrue(SetUtils.Exists(arrSet, (item) => {
+                return item == 1;
+            }));
+        }
+
+        //Exist возвращает false, если элемента нет
+        [TestMethod]
+        public void ExistMustReturnFalseIfItemsNonExist()
+        {
+            ArraySet<int> arrSet = new ArraySet<int>();
+            arrSet.Add(1);
+            arrSet.Add(3);
+
+            Assert.IsFalse(SetUtils.Exists(arrSet, (item) => {
+                return item == 2;
+            }));
+        }
+
+        //FindAll возвращает множество с четными числами
+        [TestMethod]
+        public void FindAllReturnCorrectValue()
+        {
+            ArraySet<int> arrSet = new ArraySet<int>();
+            for(int i=0; i<50; i++)
+            {
+                arrSet.Add(i);
+            }
+
+            ArraySet<int> newArrSet = SetUtils.FindAll<int, ArraySet<int>>(arrSet, (item) => {
+                return item % 2 == 0;
+            });
+
+            foreach(int item in newArrSet)
+            {
+                Assert.IsTrue(item % 2 == 0);
+            }
+            Assert.AreEqual(25, newArrSet.Count);
+        }
+
+        //ConvertAll возвращает правильный тип данных
+        [TestMethod]
+        public void ConvertAllReturnCorrectValue()
+        {
+            ArraySet<int> arrSet = new ArraySet<int>();
+            arrSet.Add(10);
+
+            Assert.IsInstanceOfType(SetUtils.ConvertAll<int, MySet.HashSet<int>>(arrSet), typeof(MySet.HashSet<int>));
+            Assert.IsInstanceOfType(SetUtils.ConvertAll<int, ArraySet<int>>(arrSet), typeof(ArraySet<int>));
+            Assert.IsInstanceOfType(SetUtils.ConvertAll<int, LinkedSet<int>>(arrSet), typeof(LinkedSet<int>));
+        }
+
+        //ConvertAll возвращает правильное количество элементов
+        [TestMethod]
+        public void ConvertAllReturnCorrectNumberOfElements()
+        {
+            ArraySet<int> arrSet = new ArraySet<int>();
+            int numOfElements = 50;
+            for (int i = 0; i < numOfElements; i++)
+            {
+                arrSet.Add(i);
+            }
+
+            Assert.AreEqual(numOfElements, SetUtils.ConvertAll<int, MySet.HashSet<int>>(arrSet).Count);
+            Assert.AreEqual(numOfElements, SetUtils.ConvertAll<int, ArraySet<int>>(arrSet).Count);
+            Assert.AreEqual(numOfElements, SetUtils.ConvertAll<int, LinkedSet<int>>(arrSet).Count);
+        }
+
+        //ForEach запускает фукнцию для всех элементов
+        [TestMethod]
+        public void ForEachRunFuncForEverItem()
+        {
+            ArraySet<int> arrSet = new ArraySet<int>();
+            int numOfElements = 50;
+            bool[] testArray = new bool[numOfElements];
+            for (int i = 0; i < numOfElements; i++)
+            {
+                arrSet.Add(i);
+                testArray[i] = false;
+            }
+
+            SetUtils.ForEach<int>(arrSet, (item) => {
+                testArray[item] = true;
+            });
+
+            for (int i = 0; i < numOfElements; i++)
+            {
+                Assert.IsTrue(testArray[i]);
+            }
+        }
+
+        [TestMethod]
+        public void CheckForAllReturnTrue()
+        {
+            ArraySet<int> arrSet = new ArraySet<int>();
+            int numOfElements = 50;
+            for (int i = 0; i < numOfElements; i++)
+            {
+                arrSet.Add(i);
+            }
+
+            Assert.IsTrue(SetUtils.CheckForAll<int>(arrSet, (item)=>{
+                return item >= 0 && item <= numOfElements;
+            }));
         }
     }
 }
