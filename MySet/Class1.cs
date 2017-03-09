@@ -102,14 +102,7 @@ namespace MySet
 
         public override bool Contains(T value)
         {
-            foreach (T item in array)
-            {
-                if (item.Equals(value))
-                {
-                    return true;
-                }
-            }
-            return false;
+            return array.Any(item => item.Equals(value));
         }
 
         public override IEnumerator GetEnumerator()
@@ -359,10 +352,7 @@ namespace MySet
             throw new NotAllowedMethodException();
         }
 
-        public override bool Contains(T value)//Как тут сделать ссылку =>, как в свойстах?
-        {
-            return iset.Contains(value);
-        }
+        public override bool Contains(T value) => iset.Contains(value);
 
         public override IEnumerator GetEnumerator()
         {
