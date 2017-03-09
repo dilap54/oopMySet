@@ -29,18 +29,18 @@ namespace MySet
 
 
     //Базовый класс
-    public abstract class ISet<T>: IEnumerable where T : IEquatable<T>
+    public abstract class ISet<T>: IEnumerable<T> where T : IEquatable<T>
     {
         //Объявление метода, нужного для IEnumerable
-        public abstract IEnumerator GetEnumerator();
-
-        /*
-        //Тоже нужно для IEnumerable. И но я хз что это.
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return GetEnumerator();
         }
-        */
+
+
+        //Тоже нужно для IEnumerable. И но я хз что это.
+        public abstract IEnumerator<T> GetEnumerator();
+        
 
         //Кучка нужных методов, реализуемых в дочерних классах
         public abstract void Add(T value);
@@ -54,11 +54,19 @@ namespace MySet
         public abstract int Count
         {
             get;
+            /* Можно сделать так, но в дочерних методах есть более быстрые реализации
+            {
+                return Enumerable.Count(this);
+            }
+            */
         }
 
-        public abstract bool isEmpty
+        public bool isEmpty
         {
-            get;
+            get
+            {
+                return Count == 0;
+            }
         }
     }
 
@@ -74,14 +82,6 @@ namespace MySet
             }
         }
 
-        public override bool isEmpty
-        {
-            get
-            {
-                return Count == 0;
-            }
-        }
-
         public ArraySet(){
             array = new T[0];
         }
@@ -90,7 +90,7 @@ namespace MySet
         {
             if (!Contains(value))//Если такого элемента еще нет
             {
-                Array.Resize<T>(ref array, Count + 1);
+                Array.Resize(ref array, Count + 1);
                 array[Count - 1] = value;
             }
         }
@@ -102,12 +102,13 @@ namespace MySet
 
         public override bool Contains(T value)
         {
-            return array.Any(item => item.Equals(value));
+            return array.Contains(value);
+            //return array.Any(item => item.Equals(value));
         }
 
-        public override IEnumerator GetEnumerator()
+        public override IEnumerator<T> GetEnumerator()
         {
-            return array.GetEnumerator();
+            return array.AsEnumerable().GetEnumerator();
         }
 
         public override void Remove(T value)
@@ -138,18 +139,7 @@ namespace MySet
 
         public override int Count
         {
-            get
-            {
-                return count;
-            }
-        }
-
-        public override bool isEmpty
-        {
-            get
-            {
-                return Count == 0;
-            }
+            get { return count; }
         }
 
         public LinkedSet()
@@ -184,24 +174,10 @@ namespace MySet
 
         public override bool Contains(T value)
         {
-            if (isEmpty)
-            {
-                return false;
-            }
-            Node tmp = head;
-
-            while(tmp != null)
-            {
-                if (tmp.data.Equals(value))
-                {
-                    return true;
-                }
-                tmp = tmp.next;
-            }
-            return false;
+            return Enumerable.Contains(this,value);
         }
 
-        public override IEnumerator GetEnumerator()
+        public override IEnumerator<T> GetEnumerator()
         {
             Node tmp = head;
             while(tmp != null)
@@ -265,14 +241,6 @@ namespace MySet
             }
         }
 
-        public override bool isEmpty
-        {
-            get
-            {
-                return Count == 0;
-            }
-        }
-
         public override void Add(T value)
         {
             if (!Contains(value))
@@ -298,17 +266,10 @@ namespace MySet
         {
             int hash = value.GetHashCode() % htLength;
             T[] arrayOnHash = htable[hash];
-            foreach (T item in arrayOnHash)
-            {
-                if (item.Equals(value))
-                {
-                    return true;
-                }
-            }
-            return false;
+            return arrayOnHash.Contains(value);
         }
 
-        public override IEnumerator GetEnumerator()
+        public override IEnumerator<T> GetEnumerator()
         {
             foreach (T[] item in htable)
             {
@@ -340,8 +301,6 @@ namespace MySet
 
         public override int Count => iset.Count;
 
-        public override bool isEmpty => iset.isEmpty;
-
         public override void Add(T value)
         {
             throw new NotAllowedMethodException();
@@ -354,10 +313,7 @@ namespace MySet
 
         public override bool Contains(T value) => iset.Contains(value);
 
-        public override IEnumerator GetEnumerator()
-        {
-            return iset.GetEnumerator();
-        }
+        public override IEnumerator<T> GetEnumerator() => iset.GetEnumerator();
 
         public override void Remove(T value)
         {
@@ -415,14 +371,7 @@ namespace MySet
 
         public static bool CheckForAll<T>(ISet<T> iset, Func<T, bool> check) where T : IEquatable<T>
         {
-            foreach (T item in iset)
-            {
-                if (!check(item))
-                {
-                    return false;
-                }
-            }
-            return true;
+            return Enumerable.All(iset, check);
         }
     }
 }

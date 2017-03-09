@@ -323,6 +323,7 @@ namespace MySetTests
             }
         }
 
+        //CheckForAll возвращает true, если все элементы от 0 до 50 больше 0 и меньше 50
         [TestMethod]
         public void CheckForAllReturnTrue()
         {
